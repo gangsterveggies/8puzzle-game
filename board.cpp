@@ -2,7 +2,8 @@
 
 Move Board::possible_moves[] = { Left, Right, Up, Down };
 int Board::total_moves = 4;
-int Board::random_swaps = 137;
+int Board::random_swaps = 60;//;137;
+int Board::gods_number[] = {0, 0, 10, 31, 80};
 
 int Board::empty(board input_board)
 {
@@ -24,6 +25,15 @@ board Board::swap_square(int position_i, int position_j, board input_board)
   int value_i = get_square(position_i, input_board);
   int value_j = get_square(position_j, input_board);
   return set_square(position_j, value_i, set_square(position_i, value_j, input_board));
+}
+
+board Board::rotate_board(board input_board)
+{
+  int i, j;
+  for (i = 0; i < Global::N - 1; i++)
+    for (j = i + 1; j < Global::N; j++)
+      input_board = swap_square(i * Global::N + j, j * Global::N + i, input_board);
+  return input_board;
 }
 
 board Board::read_board()
@@ -103,49 +113,88 @@ board Board::move_square(board input_board, Move move)
   }
 }
 
-int Board::heuristic(board input_board)
+int Board::heuristic(board input_board, board objetive_board)
 {
-  int h1 = 0, h2 = 0;
-  int i, j;
+  int h1 = 0, h2 = 0, h3 = 0, h4 = 0;
+  int i, j, k;
 
   for (i = 0; i < Global::N; i++)
-    for(j = 0; j < Global::N; j++)
+    for (j = 0; j < Global::N; j++)
     {
-      int vl = get_square(Global::N * i + j, input_board);
-      if (vl != Global::N * i + j && vl != 0)
+      int real_value = get_square(Global::N * i + j, input_board);
+      int expected_value = get_square(Global::N * i + j, objetive_board);
+      int real_i = real_value / Global::N;
+      int real_j = real_value % Global::N;
+      int expected_i = expected_value / Global::N;
+      int expected_j = expected_value % Global::N;
+      
+      if (real_value != expected_value && real_value != 0)
       {
         h1++;
-        h2 += abs(i - vl / Global::N) + abs(j - vl % Global::N);
+        h2 += abs(real_i - expected_i) + abs(real_j - expected_j);
+      }
+
+      for (k = 0; k < Global::N; k++)
+      {
+        int real_k_j = real_value % Global::N;
+        int expected_k_j = expected_value % Global::N;
+
+        h3 += ((real_k_j < real_j) != (expected_k_j < expected_j));
       }
     }
 
-  return max(h1, h2);
+/*  int inversion_count = 0;
+  for (i = 0; i < Global::N * Global::N; i++)
+  {
+    int current_value = get_square(i, input_board);
+
+    if (current_value == 0)
+      continue;
+
+    for (j = 0; j < i; j++)
+      if (get_square(j, input_board) > current_value)
+        inversion_count++;
+  }
+
+  h4 = inversion_count / 3 + inversion_count % 3;
+
+  input_board = rotate_board(input_board);
+
+  inversion_count = 0;
+  for (i = 0; i < Global::N * Global::N; i++)
+  {
+    int current_value = get_square(i, input_board);
+    if (current_value == 0)
+      continue;
+
+    for (j = 0; j < i; j++)
+      if (get_square(j, input_board) > current_value)
+        inversion_count++;
+  }
+
+  h4 += inversion_count / 3 + inversion_count % 3;*/
+
+  return max(h1, max(h2, max(h3, h4)));
 }
 
 int Board::invariant(board input_board)
 {
   int h1 = 0, h2 = 0;
 
-  int i;
-  for (i = 0; i < Global::N * Global::N; i++)
-    if (get_square(i, input_board) == 0)
-      h1 = i;
-
-  int visited[Global::N * Global::N];
-  memset(visited, 0, sizeof visited);
+  int i, j;
 
   for (i = 0; i < Global::N * Global::N; i++)
   {
-    if (visited[i])
+    int current_value = get_square(i, input_board);
+    if (current_value == 0 && Global::N % 2 == 0)
+      h1 = i / Global::N + 1;
+
+    if (current_value == 0)
       continue;
 
-    int current = get_square(i, input_board);
-    while (current != i)
-    {
-      visited[current] = 1;
-      current = get_square(current, input_board);
-      h2++;
-    }
+    for (j = 0; j < i; j++)
+      if (get_square(j, input_board) > current_value)
+        h2++;
   }
 
   return (h1 + h2) % 2;
@@ -158,7 +207,6 @@ int Board::solvable(board initial_board, board final_board)
 
 board Board::random_board()
 {
-  srand(time(NULL));
   int i;
   board new_board = 0;
 

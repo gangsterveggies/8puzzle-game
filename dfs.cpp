@@ -34,7 +34,7 @@ node* DFS::solve_recursive(node* current_node)
   if (current_node->current == objetive_board)
     return current_node;
 
-  if (current_node->depth >= 31)
+  if (current_node->depth >= Board::gods_number[Global::N])
     return NULL;
 
   int i;

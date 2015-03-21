@@ -6,6 +6,8 @@
 #include "iddfs.h"
 #include "greedy.h"
 #include "astar.h"
+#include "idastar.h"
+#include "timer.h"
 
 int Global::N; // Board size
 int Global::k; // Minimum bit representation of board
@@ -17,6 +19,8 @@ board initial_board, final_board; // Objetive boards
 
 void init()
 {
+  srand(time(NULL));
+
   help_flag = 0;
   Global::N = 3;
   Global::k = log2(Global::N * Global::N - 1) + 1;
@@ -57,7 +61,7 @@ int process_arguments(int argc, char *argv[])
       help_flag = 1;
     else if ((strcmp(argv[i], "-m") == 0))
     {
-      method_flag = max(4, min(0, atoi(argv[i + 1])));
+      method_flag = max(5, min(0, atoi(argv[i + 1])));
       i++;
     }
     else if (strcmp(argv[i], "-ir") == 0)
@@ -74,6 +78,8 @@ int process_arguments(int argc, char *argv[])
       method_flag = 3;
     else if (strcmp(argv[i], "--astar") == 0)
       method_flag = 4;
+    else if (strcmp(argv[i], "--idastar") == 0)
+      method_flag = 5;
     else
       return 1;
   return 0;
@@ -88,7 +94,7 @@ void output_help()
 
 void read_input()
 {
-  if (initial_board == 0)
+  if (initial_board == 0 || initial_randomize)
   {
     if (initial_randomize)
       initial_board = Board::random_board();
@@ -99,7 +105,7 @@ void read_input()
     }
   }
 
-  if (final_board == 0)
+  if (final_board == 0 || final_randomize)
   {
     if (final_randomize)
       final_board = Board::random_board();
@@ -137,6 +143,8 @@ vector<Move> calculate()
     engine = new Greedy();
   else if (method_flag == 4)
     engine = new AStar();
+  else if (method_flag == 5)
+    engine = new IDAStar();
 
   engine->solve(initial_board, final_board);
   vector<Move> list_moves = engine->get_solution();
@@ -148,6 +156,7 @@ vector<Move> calculate()
 void output_result(vector<Move> list_moves)
 {
   printf("Number of steps: %d\n", (int)list_moves.size());
+  printf("Elapsed time: %lf\n", Timer::elapsed());
 }
 
 int main(int argc, char *argv[])
@@ -162,7 +171,9 @@ int main(int argc, char *argv[])
   
   read_input();
 
+  Timer::start();
   vector<Move> list_moves = calculate();
+  Timer::stop();
 
   output_result(list_moves);
 

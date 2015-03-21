@@ -42,10 +42,13 @@ node* AStar::solve_astar(node* start_node)
 
   state_queue.push(queue_node(0, start_node));
 
-  while (1)
+  while (!state_queue.empty())
   {
     current_node = state_queue.top().second;
     state_queue.pop();
+
+    if (current_node->depth >= Board::gods_number[Global::N])
+      continue;
 
     if (current_node->current == objetive_board)
       return current_node;
@@ -66,12 +69,14 @@ node* AStar::solve_astar(node* start_node)
       next_node->parent = current_node;
       next_node->last_move = Board::possible_moves[i];
       next_node->depth = current_node->depth + 1;
-      next_node->cost = next_node->depth + Board::heuristic(next_node->current);
+      next_node->cost = next_node->depth + Board::heuristic(next_node->current, objetive_board);
       state_list.push_back(next_node);
 
       state_queue.push(queue_node(-next_node->cost, next_node));
     }
   }
+
+  return NULL;
 }
 
 void AStar::solve(board initial_board, board final_board)

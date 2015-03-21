@@ -42,7 +42,7 @@ node* BFS::solve_bfs(node* start_node)
 
   state_queue.push(queue_node(0, start_node));
 
-  while (1)
+  while (!state_queue.empty())
   {
     current_node = state_queue.front().second;
     state_queue.pop();
@@ -72,6 +72,8 @@ node* BFS::solve_bfs(node* start_node)
       state_queue.push(queue_node(next_node->cost, next_node));
     }
   }
+
+  return NULL;
 }
 
 void BFS::solve(board initial_board, board final_board)

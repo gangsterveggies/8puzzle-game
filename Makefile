@@ -13,7 +13,9 @@ SRC =                   	\
 	bfs.cpp 		\
 	iddfs.cpp		\
 	greedy.cpp		\
-	astar.cpp
+	astar.cpp		\
+	idastar.cpp		\
+	timer.cpp
 
 OBJ =  ${SRC:.cpp=.o}
 
