@@ -10,25 +10,6 @@ IDDFS::~IDDFS()
   visited.clear();
 }
 
-vector<Move> IDDFS::reconstruct_solution(node* final_node)
-{
-  vector<Move> list_moves;
-
-  if (final_node == NULL)
-    return list_moves;
-  
-  node* current_node = final_node;
-  while (current_node->parent != NULL)
-  {
-    list_moves.push_back(current_node->last_move);
-    current_node = current_node->parent;
-  }
-
-  reverse(list_moves.begin(), list_moves.end());
-
-  return list_moves;
-}
-
 node* IDDFS::solve_recursive(node* current_node, int limit)
 { 
   if (current_node->current == objetive_board)
@@ -49,7 +30,8 @@ node* IDDFS::solve_recursive(node* current_node, int limit)
       if (visited[next_board] <= current_node->cost + 1)
         continue;
     visited[next_board] = current_node->cost + 1;
-    
+
+    add_node();
     node* next_node = new node();
     next_node->current = next_board;
     next_node->parent = current_node;
@@ -62,6 +44,7 @@ node* IDDFS::solve_recursive(node* current_node, int limit)
     if (solution_node != NULL)
       return solution_node;
 
+    free_node();
     delete next_node;
   }
 
@@ -72,6 +55,7 @@ void IDDFS::solve(board initial_board, board final_board)
 {
   objetive_board = final_board;
 
+  add_node();
   node* start_node = new node();
   start_node->current = initial_board;
   start_node->parent = NULL;

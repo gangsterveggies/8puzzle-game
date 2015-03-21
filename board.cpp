@@ -2,7 +2,7 @@
 
 Move Board::possible_moves[] = { Left, Right, Up, Down };
 int Board::total_moves = 4;
-int Board::random_swaps = 60;//;137;
+int Board::random_swaps = 237;
 int Board::gods_number[] = {0, 0, 10, 31, 80};
 
 int Board::empty(board input_board)
@@ -36,26 +36,30 @@ board Board::rotate_board(board input_board)
   return input_board;
 }
 
-board Board::read_board()
+board Board::read_board(FILE* input_file)
 {
   board input_board = 0;
+  int i;
 
-  printf("Order:\n");
-
-  int i, j;
-  for (i = 0; i < Global::N; i++)
+  if (input_file == stdin)
   {
-    printf("\t");
-    for (j = 0; j < Global::N; j++)
-      printf("%d%c", i * Global::N + j, j == Global::N - 1 ? '\n' : ' ');
-  }
+    printf("Order:\n");
+
+    int j;
+    for (i = 0; i < Global::N; i++)
+    {
+      printf("\t");
+      for (j = 0; j < Global::N; j++)
+        printf("%d%c", i * Global::N + j, j == Global::N - 1 ? '\n' : ' ');
+    }
   
-  printf("(use 0 for empty square)\n");
+    printf("(use 0 for empty square)\n");
+  }
 
   int vl;
   for (i = 0; i < Global::N * Global::N; i++)
   {
-    scanf("%d", &vl);
+    fscanf(input_file, "%d", &vl);
     input_board = set_square(i, vl, input_board);
   }
 
@@ -70,6 +74,39 @@ void Board::print_board(board input_board)
     printf("\t");
     for (j = 0; j < Global::N; j++)
       printf("%d%c", get_square(i * Global::N + j, input_board), j == Global::N - 1 ? '\n' : ' ');
+  }
+}
+
+void Board::print_setup(board initial_board, board final_board)
+{
+  int double_digits = Global::N * Global::N - 1 >= 10;
+  int i, j;
+  for (i = 0; i < Global::N; i++)
+  {
+    if (i == Global::N / 2)
+      printf("  From  ");
+    else
+      printf("        ");
+    for (j = 0; j < Global::N; j++)
+    {
+      if (double_digits)
+        printf("%2d ", get_square(i * Global::N + j, initial_board));
+      else
+        printf("%d ", get_square(i * Global::N + j, initial_board));
+    }
+      
+    if (i == Global::N / 2)
+      printf("  To   ");
+    else
+      printf("       ");
+
+    for (j = 0; j < Global::N; j++)
+    {
+      if (double_digits)
+        printf("%2d%c", get_square(i * Global::N + j, final_board), j == Global::N - 1 ? '\n' : ' ');
+      else
+        printf("%d%c", get_square(i * Global::N + j, final_board), j == Global::N - 1 ? '\n' : ' ');
+    }
   }
 }
 
@@ -115,7 +152,7 @@ board Board::move_square(board input_board, Move move)
 
 int Board::heuristic(board input_board, board objetive_board)
 {
-  int h1 = 0, h2 = 0, h3 = 0, h4 = 0;
+  int h1 = 0, h2 = 0, h3 = 0, h4 = 0, h5 = 0;
   int i, j, k;
 
   for (i = 0; i < Global::N; i++)
@@ -134,47 +171,73 @@ int Board::heuristic(board input_board, board objetive_board)
         h2 += abs(real_i - expected_i) + abs(real_j - expected_j);
       }
 
-      for (k = 0; k < Global::N; k++)
+      /*    for (k = 0; k < Global::N; k++)
       {
-        int real_k_j = real_value % Global::N;
-        int expected_k_j = expected_value % Global::N;
+        int real_value_k = get_square(Global::N * i + k, input_board);
+        int expected_value_k = get_square(Global::N * i + k, objetive_board);
+        int real_k_j = real_value_k % Global::N;
+        int expected_k_j = expected_value_k % Global::N;
 
         h3 += ((real_k_j < real_j) != (expected_k_j < expected_j));
-      }
+        }*/
     }
 
-/*  int inversion_count = 0;
+/*  int** board_matrix = new int*[Global::N];
+  int* position_matrix = new int[Global::N * Global::N];
+  for (i = 0; i < Global::N; i++)
+  {
+    board_matrix[i] = new int[Global::N];
+    for (j = 0; j < Global::N; j++)
+    {
+      board_matrix[i][j] = get_square(Global::N * i + j, input_board);
+      position_matrix[Global::N * i + j] = board_matrix[i][j];
+    }
+  }
+
+  for (i = 0; i < Global::N; i++)
+    for (j = 0; j < Global::N; j++)
+    {
+      h5 += abs(position_matrix[board_matrix[i][j]] / Global::N - i);
+      h5 += abs(position_matrix[board_matrix[i][j]] % Global::N - j);
+    }
+
+  for (i = 0; i < Global::N; i++)
+    delete[] board_matrix[i];
+  delete[] board_matrix;
+  delete[] position_matrix;
+
+  int* board_array = new int[Global::N * Global::N - 1];
+
+  int current_index = 0;
   for (i = 0; i < Global::N * Global::N; i++)
   {
     int current_value = get_square(i, input_board);
 
-    if (current_value == 0)
-      continue;
-
-    for (j = 0; j < i; j++)
-      if (get_square(j, input_board) > current_value)
-        inversion_count++;
+    if (current_value)
+      board_array[current_index++] = current_value;
   }
 
-  h4 = inversion_count / 3 + inversion_count % 3;
+  int inversions = inversion_count(board_array, current_index);
+
+  h4 = inversions / 3 + inversions % 3;
 
   input_board = rotate_board(input_board);
 
-  inversion_count = 0;
+  current_index = 0;
   for (i = 0; i < Global::N * Global::N; i++)
   {
     int current_value = get_square(i, input_board);
-    if (current_value == 0)
-      continue;
 
-    for (j = 0; j < i; j++)
-      if (get_square(j, input_board) > current_value)
-        inversion_count++;
+    if (current_value)
+      board_array[current_index++] = current_value;
   }
 
-  h4 += inversion_count / 3 + inversion_count % 3;*/
+  inversions = inversion_count(board_array, current_index);
+  delete[] board_array;
 
-  return max(h1, max(h2, max(h3, h4)));
+  h4 += inversions / 3 + inversions % 3;*/
+
+  return max(h1, max(h2, max(h3, max(h4, h5))));
 }
 
 int Board::invariant(board input_board)
@@ -223,4 +286,63 @@ board Board::random_board()
   }
 
   return new_board;
+}
+  
+int Board::inversion_count(int arr[], int n)
+{
+  int* temp = new int[n];
+  int ans = merge_sort_count(arr, temp, 0, n - 1);
+  delete[] temp;
+  return ans;
+}
+  
+int Board::merge_sort_count(int arr[], int temp[], int left, int right)
+{
+  int inv_count = 0;
+
+  if (right > left)
+  {
+    int middle = (right + left) / 2;
+
+    inv_count = merge_sort_count(arr, temp, left, middle);
+    inv_count += merge_sort_count(arr, temp, middle + 1, right);
+  
+    inv_count += merge(arr, temp, left, middle + 1, right);
+  }
+
+  return inv_count;
+}
+
+int Board::merge(int arr[], int temp[], int left, int mid, int right)
+{
+  int i, j, k;
+  int inv_count = 0;
+  
+  i = left;
+  j = mid;
+  k = left;
+
+  while ((i <= mid - 1) && (j <= right))
+  {
+    if (arr[i] <= arr[j])
+    {
+      temp[k++] = arr[i++];
+    }
+    else
+    {
+      temp[k++] = arr[j++];
+      inv_count = inv_count + (mid - i);
+    }
+  }
+
+  while (i <= mid - 1)
+    temp[k++] = arr[i++];
+
+  while (j <= right)
+    temp[k++] = arr[j++];
+
+  for (i=left; i <= right; i++)
+    arr[i] = temp[i];
+  
+  return inv_count;
 }

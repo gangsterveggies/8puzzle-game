@@ -11,10 +11,16 @@ class Search
 
   virtual void solve(board initial_board, board final_board) {};
   virtual vector<Move> get_solution() {};
+  int get_used_nodes();
 
- private:
+ protected:
 
-  virtual vector<Move> reconstruct_solution(node* final_node) {};
+  int used_nodes;
+  int maximum_nodes;
+
+  vector<Move> reconstruct_solution(node* final_node);
+  void add_node();
+  void free_node();
 };
 
 #endif

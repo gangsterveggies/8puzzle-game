@@ -25,7 +25,6 @@ class BFS : public Search
   vector<Move> solution; // Solution obtained
   vector<node*> state_list; // Found states to be deleted
 
-  vector<Move> reconstruct_solution(node* final_node);
   node* solve_bfs(node* start_node);
 };
 

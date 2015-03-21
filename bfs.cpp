@@ -11,28 +11,12 @@ BFS::~BFS()
 
   int i;
   for (i = 0; i < (int)state_list.size(); i++)
-    delete state_list[i];
-
-  state_list.clear();
-}
-
-vector<Move> BFS::reconstruct_solution(node* final_node)
-{
-  vector<Move> list_moves;
-
-  if (final_node == NULL)
-    return list_moves;
-  
-  node* current_node = final_node;
-  while (current_node->parent != NULL)
   {
-    list_moves.push_back(current_node->last_move);
-    current_node = current_node->parent;
+    free_node();
+    delete state_list[i];
   }
 
-  reverse(list_moves.begin(), list_moves.end());
-
-  return list_moves;
+  state_list.clear();
 }
 
 node* BFS::solve_bfs(node* start_node)
@@ -61,6 +45,7 @@ node* BFS::solve_bfs(node* start_node)
         continue;
       visited.insert(next_board);
 
+      add_node();
       node* next_node = new node();
       next_node->current = next_board;
       next_node->parent = current_node;
@@ -80,6 +65,7 @@ void BFS::solve(board initial_board, board final_board)
 {
   objetive_board = final_board;
 
+  add_node();
   node* start_node = new node();
   start_node->current = initial_board;
   start_node->parent = NULL;

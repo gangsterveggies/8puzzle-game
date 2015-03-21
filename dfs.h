@@ -23,7 +23,6 @@ class DFS : public Search
   vector<Move> solution; // Solution obtained
 
   node* solve_recursive(node* current_node);
-  vector<Move> reconstruct_solution(node* final_node);
 };
 
 #endif

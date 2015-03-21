@@ -23,7 +23,6 @@ class IDAStar : public Search
   vector<Move> solution; // Solution obtained
 
   queue_node solve_recursive(node* current_node, int limit);
-  vector<Move> reconstruct_solution(node* final_node);
 };
 
 #endif
