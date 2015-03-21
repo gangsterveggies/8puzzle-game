@@ -9,7 +9,8 @@ SRC =                   	\
 	main.cpp 		\
 	board.cpp		\
 	search.cpp 		\
-	dfs.cpp
+	dfs.cpp 		\
+	bfs.cpp
 
 OBJ =  ${SRC:.cpp=.o}
 
