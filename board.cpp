@@ -2,7 +2,7 @@
 
 Move Board::possible_moves[] = { Left, Right, Up, Down };
 int Board::total_moves = 4;
-
+int Board::random_swaps = 137;
 
 int Board::empty(board input_board)
 {
@@ -101,4 +101,78 @@ board Board::move_square(board input_board, Move move)
 
     return swap_square(zero_position, zero_position + Global::N, input_board);
   }
+}
+
+int Board::heuristic(board input_board)
+{
+  int h1 = 0, h2 = 0;
+  int i, j;
+
+  for (i = 0; i < Global::N; i++)
+    for(j = 0; j < Global::N; j++)
+    {
+      int vl = get_square(Global::N * i + j, input_board);
+      if (vl != Global::N * i + j && vl != 0)
+      {
+        h1++;
+        h2 += abs(i - vl / Global::N) + abs(j - vl % Global::N);
+      }
+    }
+
+  return max(h1, h2);
+}
+
+int Board::invariant(board input_board)
+{
+  int h1 = 0, h2 = 0;
+
+  int i;
+  for (i = 0; i < Global::N * Global::N; i++)
+    if (get_square(i, input_board) == 0)
+      h1 = i;
+
+  int visited[Global::N * Global::N];
+  memset(visited, 0, sizeof visited);
+
+  for (i = 0; i < Global::N * Global::N; i++)
+  {
+    if (visited[i])
+      continue;
+
+    int current = get_square(i, input_board);
+    while (current != i)
+    {
+      visited[current] = 1;
+      current = get_square(current, input_board);
+      h2++;
+    }
+  }
+
+  return (h1 + h2) % 2;
+}
+
+int Board::solvable(board initial_board, board final_board)
+{
+  return invariant(initial_board) == invariant(final_board);
+}
+
+board Board::random_board()
+{
+  srand(time(NULL));
+  int i;
+  board new_board = 0;
+
+  for (i = 0; i < Global::N * Global::N; i++)
+    new_board = set_square(i, i, new_board);
+
+  for (i = 0; i < random_swaps; i++)
+  {
+    int move = rand() % total_moves;
+    board next_board = move_square(new_board, possible_moves[move]);
+
+    if (next_board)
+      new_board = next_board;
+  }
+
+  return new_board;
 }

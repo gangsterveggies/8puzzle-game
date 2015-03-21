@@ -11,7 +11,9 @@ SRC =                   	\
 	search.cpp 		\
 	dfs.cpp 		\
 	bfs.cpp 		\
-	iddfs.cpp
+	iddfs.cpp		\
+	greedy.cpp		\
+	astar.cpp
 
 OBJ =  ${SRC:.cpp=.o}
 

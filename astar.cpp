@@ -1,10 +1,10 @@
-#include "bfs.h"
+#include "astar.h"
 
-BFS::BFS()
+AStar::AStar()
 {
 }
 
-BFS::~BFS()
+AStar::~AStar()
 {
   solution.clear();
   visited.clear();
@@ -16,7 +16,7 @@ BFS::~BFS()
   state_list.clear();
 }
 
-vector<Move> BFS::reconstruct_solution(node* final_node)
+vector<Move> AStar::reconstruct_solution(node* final_node)
 {
   vector<Move> list_moves;
 
@@ -35,7 +35,7 @@ vector<Move> BFS::reconstruct_solution(node* final_node)
   return list_moves;
 }
 
-node* BFS::solve_bfs(node* start_node)
+node* AStar::solve_astar(node* start_node)
 {
   node* current_node;
   int i;
@@ -44,7 +44,7 @@ node* BFS::solve_bfs(node* start_node)
 
   while (1)
   {
-    current_node = state_queue.front().second;
+    current_node = state_queue.top().second;
     state_queue.pop();
 
     if (current_node->current == objetive_board)
@@ -66,15 +66,15 @@ node* BFS::solve_bfs(node* start_node)
       next_node->parent = current_node;
       next_node->last_move = Board::possible_moves[i];
       next_node->depth = current_node->depth + 1;
-      next_node->cost = current_node->cost + 1;
+      next_node->cost = next_node->depth + Board::heuristic(next_node->current);
       state_list.push_back(next_node);
 
-      state_queue.push(queue_node(next_node->cost, next_node));
+      state_queue.push(queue_node(-next_node->cost, next_node));
     }
   }
 }
 
-void BFS::solve(board initial_board, board final_board)
+void AStar::solve(board initial_board, board final_board)
 {
   objetive_board = final_board;
 
@@ -85,13 +85,13 @@ void BFS::solve(board initial_board, board final_board)
   start_node->depth = 0;
   start_node->cost = 0;
 
-  node* solution_node = solve_bfs(start_node);
+  node* solution_node = solve_astar(start_node);
   solution = reconstruct_solution(solution_node);
 
   delete start_node;
 }
 
-vector<Move> BFS::get_solution()
+vector<Move> AStar::get_solution()
 {
   return solution;
 }
