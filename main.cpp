@@ -3,6 +3,7 @@
 #include "search.h"
 #include "dfs.h"
 #include "bfs.h"
+#include "iddfs.h"
 
 int Global::N; // Board size
 int Global::k; // Minimum bit representation of board
@@ -107,7 +108,7 @@ vector<Move> calculate()
   else if (method_flag == 1)
     engine = new BFS();
   else if (method_flag == 2)
-    method_flag = 2;
+    engine = new IDDFS();
   else if (method_flag == 3)
     method_flag = 3;
   else if (method_flag == 4)
