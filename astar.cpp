@@ -45,8 +45,9 @@ node* AStar::solve_astar(node* start_node)
         continue;
 
       if (visited.find(next_board) != visited.end())
-        continue;
-      visited.insert(next_board);
+        if (visited[next_board] <= current_node->depth + 1)
+          continue;
+      visited[next_board] = current_node->depth + 1;
 
       add_node();
       node* next_node = new node();
