@@ -4,7 +4,7 @@
 #include "common.h"
 #include "search.h"
 #include "board.h"
-#include <set>
+#include <map>
 #include <queue>
 
 class AStar : public Search
@@ -19,7 +19,7 @@ class AStar : public Search
 
  private:
 
-  set<board> visited; // Already visited moves
+  map<board, int> visited; // Already visited moves
   priority_queue<queue_node> state_queue; // States queue
   board objetive_board; // Objetive board
   vector<Move> solution; // Solution obtained

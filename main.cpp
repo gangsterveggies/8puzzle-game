@@ -183,6 +183,8 @@ vector<Move> calculate()
     return list_moves;
   }
 
+  Board::set_board(final_board);
+
   Search* engine;
   if (method_flag == 0)
     engine = new DFS();

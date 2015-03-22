@@ -13,6 +13,7 @@ class Board
   static int random_swaps;
   static int gods_number[];
 
+  static void set_board(board objetive_board);
   static int empty(board input_board);
   static int get_square(int position, board input_board);
   static board set_square(int position, int value, board input_board);
@@ -29,6 +30,7 @@ class Board
 
  private:
 
+  static int* position_matrix;
   static int inversion_count(int arr[], int n);
   static int merge_sort_count(int arr[], int temp[], int left, int right);
   static int merge(int arr[], int temp[], int left, int mid, int right);

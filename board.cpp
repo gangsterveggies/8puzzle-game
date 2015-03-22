@@ -4,6 +4,17 @@ Move Board::possible_moves[] = { Left, Right, Up, Down };
 int Board::total_moves = 4;
 int Board::random_swaps = 237;
 int Board::gods_number[] = {0, 0, 10, 31, 80};
+int* Board::position_matrix;
+
+void Board::set_board(board objetive_board)
+{
+  position_matrix = new int[Global::N * Global::N];
+
+  int i, j;
+  for (i = 0; i < Global::N; i++)
+    for (j = 0; j < Global::N; j++)
+      position_matrix[Global::N * i + j] = get_square(Global::N * i + j, objetive_board);
+}
 
 int Board::empty(board input_board)
 {
@@ -164,11 +175,11 @@ int Board::heuristic(board input_board, board objetive_board)
       int real_j = real_value % Global::N;
       int expected_i = expected_value / Global::N;
       int expected_j = expected_value % Global::N;
-      
-      if (real_value != expected_value && real_value != 0)
+
+      if (real_value != expected_value)
       {
         h1++;
-        h2 += abs(real_i - expected_i) + abs(real_j - expected_j);
+        h2 += abs(position_matrix[real_value] / Global::N - i) + abs(position_matrix[real_value] % Global::N - j);
       }
 
       /*    for (k = 0; k < Global::N; k++)
